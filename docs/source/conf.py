@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.abspath('../../'))
 project = 'ilpdlsts'
 copyright = '2025, Santec Holdings Corporation'
 author = 'Santec Holdings Corporation'
-release = '0.0.6'
+release = '0.0.10'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
