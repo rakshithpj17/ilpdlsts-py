@@ -6,15 +6,15 @@ on:
       - 'v*.*.*'
 
 jobs:
-  build-and-publish:
+  build:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
@@ -26,8 +26,58 @@ jobs:
       - name: Build package
         run: python -m build
 
+      - name: Set dist path output
+        id: set-dist-path
+        run: echo "dist-path=dist" >> $GITHUB_OUTPUT
+
+      - name: Upload distribution artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ilpdlsts-dist
+          path: dist/*
+
+publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: release
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ilpdlsts-dist
+          path: dist
+
       - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          # To test without releasing to live PyPI, uncomment below:
+          # repository_url: https://test.pypi.org/legacy/
+
+github-release:
+    name: Create GitHub Release + Sign
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ilpdlsts-dist
+          path: dist
+
+      - name: Sign artifacts with Sigstore
+        uses: sigstore/gh-action-sigstore-python@v2.1.0
+        with:
+          inputs: |
+            dist/*.tar.gz
+            dist/*.whl
+
+      - name: Create GitHub Release
         env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-        run: twine upload dist/*
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create "${{ github.ref_name }}" dist/* --generate-notes
