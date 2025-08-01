@@ -1,6 +1,6 @@
 [project]
 name = "ilpdlsts"
-version = "0.0.8"
+version = "0.0.9"
 description = "Python Package for Santec Insertion Loss and Polarization Dependent Loss Swept Test System"
 authors = [{name = "Santec Holdings Corporation"}]
 license = "MIT"
