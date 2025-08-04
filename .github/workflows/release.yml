@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v*.*.*'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -52,7 +53,7 @@ jobs:
             user: __token__
             password: ${{ secrets.PYPI_API_TOKEN }}
             # To test without releasing to live PyPI, uncomment below:
-            # repository_url: https://test.pypi.org/legacy/
+            repository-url: https://test.pypi.org/legacy/
   
   github-release:
       name: Create GitHub Release + Sign
